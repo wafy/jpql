@@ -14,30 +14,42 @@ public class JpaMain {
         tx.begin();
 
         try {
-            Team team = new Team();
-            team.setName("teamA");
-            em.persist(team);
+            Team teamA = new Team();
+            teamA.setName("teamA");
+            em.persist(teamA);
 
-            Member member = new Member();
-            member.setUsername("관리자");
-            member.setAge(10);
-            member.setTeam(team);
-            member.setType(MemberType.ADMIN);
+            Team teamB = new Team();
+            teamB.setName("teamA");
+            em.persist(teamB);
 
-            em.persist(member);
+            Member member1 = new Member();
+            member1.setUsername("회원1");
+            member1.setAge(10);
+            member1.setTeam(teamA);
+            em.persist(member1);
 
-            em.flush();
+            Member member2 = new Member();
+            member2.setUsername("회원2");
+            member2.setAge(10);
+            member2.setTeam(teamA);
+            em.persist(member2);
+
+            Member member3 = new Member();
+            member3.setUsername("회원3");
+            member3.setAge(10);
+            member3.setTeam(teamB);
+            em.persist(member3);
+
+            //flush 자동 호출
+            int resultCount = em.createQuery("update Member m set m.age=20")
+                    .executeUpdate();
+            //영속성컨텍스트 초기화 벌크연산후 꼭 실행해야 영속성컨텍스트를 초기화 해야한다.
             em.clear();
 
-//            String query = "select 'a' || 'b' from Member m";
-//            String query = "select concat('a', 'b') from Member m";
-//            String query = "select locate('de', 'abcdef') from Member ;
-            String query = "select function('group_concat', m.username) from Member m";
-            List<String > result = em.createQuery(query, String.class)
-                    .getResultList();
-            for (String s : result) {
-                System.out.println("s = " + s);
-            }
+            Member findMember = em.find(Member.class, member1.getId());
+            System.out.println("resultCount = " + resultCount);
+            System.out.println("findMember = " + findMember);
+
             tx.commit();
         } finally {
             emf.close();
